@@ -139,8 +139,6 @@ def plot_bounded_correlation(data, threshold=(.2, .8)):
     """
 
     columns = data.keys()
-    plt.figure(figsize=(20, 20))
-
     for i, feature in enumerate(columns):
         plt.subplot(int(np.ceil(len(columns))/2), 4, i + 1)
         sns.barplot(data=data[feature])
@@ -152,6 +150,7 @@ def plot_bounded_correlation(data, threshold=(.2, .8)):
 
 
 def plot_distribution(df: pd.DataFrame, columns, feature):
+    # Plot the distribution of the specified columns with the feature
     for i, column in enumerate(columns):
         plt.subplot(len(columns), 2, i+1)
         sns.histplot(data=df, x=column, hue=feature)
@@ -165,6 +164,7 @@ def plot_distribution(df: pd.DataFrame, columns, feature):
 
 
 def plot_scatter(df: pd.DataFrame, feature, columns, color, limit):
+    # Plot the scatter relationship of the specified columns with the feature
     for i, column in enumerate(columns):
         plt.subplot(len(columns), 2, i+1)
         sns.scatterplot(data=df, y=feature, x=column, hue=color)
@@ -180,6 +180,7 @@ def plot_scatter(df: pd.DataFrame, feature, columns, color, limit):
 
 
 def plot_trend(df: pd.DataFrame, features):
+    # Plot the trend of the specified features
     plt.figure(figsize=(20, 20))
 
     for i, feature in enumerate(features):

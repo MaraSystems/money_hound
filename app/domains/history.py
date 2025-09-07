@@ -6,6 +6,5 @@ def main():
     st.title("Transaction Histories")
     st.set_page_config(layout="wide")
 
-    df = classified_transactions_df.set_index('time')
-    df = df[['amount', 'balance', 'holder', 'related', 'category', 'type', 'channel', 'device', 'reported', 'holder_bvn', 'related_bvn', 'related_bank', 'fraud', 'fraud_score']]
+    df = classified_transactions_df[['amount', 'balance', 'holder', 'related', 'category', 'type', 'channel', 'device', 'reported', 'holder_bvn', 'related_bvn', 'related_bank', 'fraud', 'fraud_score']]
     st.write(df)

@@ -29,6 +29,8 @@ def hound(df: pd.DataFrame, run=lambda d, t: (d, t)):
 
 
 def distance(latA, lonA, latB, lonB):
+    # Get the distance between 2 locations
+
     # Radius of the earth
     R = 6371
 
@@ -47,9 +49,6 @@ def distance(latA, lonA, latB, lonB):
 
 
 def rolling_averages(df, group, features, window):
-    df = df.sort_values([group, "date"]).copy()
-    data = df[[group, *features]]
-
     """
         Add rolling averages grouped by `group` back to original DataFrame.
 
@@ -60,10 +59,18 @@ def rolling_averages(df, group, features, window):
 
         @returns df: A dataframe containing the original dataframe and the rolled values.
     """
+
+    # Copy the dataframe
+    df = df.sort_values([group, "date"]).copy()
+    data = df[[group, *features]]
+
     columns = []
     for feature in features:
+        # Name the average feature
         rolled_col = f"{group}_{feature}_avg_{window}D"
         columns.append(rolled_col)
+
+        # Group and get the average of the feature within the window
         df[rolled_col] = (
             data.groupby(group)[feature]
               .transform(lambda x: x.rolling(window, min_periods=1).mean())
@@ -72,30 +79,38 @@ def rolling_averages(df, group, features, window):
     return df[columns]
 
 
-def extract_window(df, ref_date, window_size, inclusive="both"):
-    """
-    Extracts a dataset window ending at a given reference date.
-    
-    Parameters:
-    -----------
-    df : pd.DataFrame
-        Input dataset containing a datetime column.
-    date_col : str
-        The column name of the datetime column.
-    ref_date : str or pd.Timestamp
-        The reference date (e.g., '2025-08-28').
-    window_size : int
-        Number of days to include in the window.
-    inclusive : {"both", "neither", "left", "right"}
-        Whether the interval is inclusive of start/end (default "both").
+def get_rolling(df):
+    # Get the rolling average of these features
+
+    rolling_features = [
+        # Transaction dynamics
+        'amount', 'balance', 'balance_jump', 'balance_jump_rate',
+
+        # Distance
+        'distance_from_home (km)',  
         
-    Returns:
-    --------
-    pd.DataFrame
-        Subset of the dataframe within the date window.
-    """
-    ref_date = pd.to_datetime(ref_date)
-    start_date = ref_date - pd.Timedelta(days=window_size-1)
+        # Device usage
+        'holder_device_count_frequency', 
+
+        # Time
+        'holder_hour_bound_frequency',
+
+        # Holder - Related relationship
+        'holder_related_count_frequency',
+        
+        # Reversal Tracking
+        'holder_category_REVERSAL_occurance',
+
+        # Reported Tracking
+        'holder_reported_True_occurance'
+    ]
+
+    # Get for the specified windows
+    window_1 = rolling_averages(df, 'holder', rolling_features, 1)
+    window_7 = rolling_averages(df, 'holder', rolling_features, 7)
+    window_30 = rolling_averages(df, 'holder', rolling_features, 30)
+    window_120 = rolling_averages(df, 'holder', rolling_features, 120)
+
+    data = pd.concat([df, window_1, window_7, window_30, window_120], axis=1)
+    return data
     
-    mask = df['date'].between(start_date, ref_date, inclusive=inclusive)
-    return df.loc[mask].copy()
